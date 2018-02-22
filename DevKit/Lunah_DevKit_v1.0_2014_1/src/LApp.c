@@ -40,11 +40,17 @@ int main()
 	XUartPs_SetOperMode(&Uart_PS, XUARTPS_OPER_MODE_NORMAL);
 	//*******************Setup the UART **********************//
 
+//	unsigned int *fake_event_data;
+//	fake_event_data = (unsigned int *)malloc(4096 * sizeof(unsigned int));
+//	if(fake_event_data == NULL)
+//		xil_printf("Could not allocate fake_event_data\r\n");
+	unsigned char fake_event_data[1000] = "";
+
 	//*******************Receive and Process Packets **********************//
 	Xil_Out32 (XPAR_AXI_GPIO_0_BASEADDR, 11);
 	Xil_Out32 (XPAR_AXI_GPIO_1_BASEADDR, 71);
 	Xil_Out32 (XPAR_AXI_GPIO_2_BASEADDR, 167);
-	Xil_Out32 (XPAR_AXI_GPIO_3_BASEADDR, 2015);
+	Xil_Out32 (XPAR_AXI_GPIO_3_BASEADDR, 1500);
 /*	Xil_Out32 (XPAR_AXI_GPIO_4_BASEADDR, 12);
 	Xil_Out32 (XPAR_AXI_GPIO_5_BASEADDR, 75);
 	Xil_Out32 (XPAR_AXI_GPIO_6_BASEADDR, 75);
@@ -67,46 +73,46 @@ int main()
 		ffs_res = f_mount(0, &fatfs);
 		doMount = 1;
 	}
-	if( f_stat( cLogFile, &fno) ){	// f_stat returns non-zero(false) if no file exists, so open/create the file
-		ffs_res = f_open(&logFile, cLogFile, FA_WRITE|FA_OPEN_ALWAYS);
-		ffs_res = f_write(&logFile, cZeroBuffer, 10, &numBytesWritten);
-		filptr_clogFile += numBytesWritten;		// Protect the first xx number of bytes to use as flags, in this case xx must be 10
-		ffs_res = f_close(&logFile);
-	}
-	else // If the file exists, read it
-	{
-		ffs_res = f_open(&logFile, cLogFile, FA_READ|FA_WRITE);	//open with read/write access
-		ffs_res = f_lseek(&logFile, 0);							//go to beginning of file
-		ffs_res = f_read(&logFile, &filptr_buffer, 10, &numBytesRead);	//Read the first 10 bytes to determine flags and the size of the write pointer
-		sscanf(filptr_buffer, "%d", &filptr_clogFile);			//take the write pointer from char -> integer so we may use it
-		ffs_res = f_lseek(&logFile, filptr_clogFile);			//move the write pointer so we don't overwrite info
-		iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "POWER RESET %f ", dTime);	//write that the system was power cycled
-		usleep(200);
-		ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);	//write to the file
-		filptr_clogFile += numBytesWritten;						//update the write pointer
-		ffs_res = f_close(&logFile);							//close the file
-	}
-
-	if( f_stat(cDirectoryLogFile0, &fnoDIR) )	//check if the file exists
-	{
-		ffs_res = f_open(&directoryLogFile, cDirectoryLogFile0, FA_WRITE|FA_OPEN_ALWAYS);	//if no, create the file
-		ffs_res = f_write(&directoryLogFile, cZeroBuffer, 10, &numBytesWritten);			//write the zero buffer so we can keep track of the write pointer
-		filptr_cDIRFile += 10;																//move the write pointer
-		ffs_res = f_write(&directoryLogFile, cLogFile, 11, &numBytesWritten);				//write the name of the log file because it was created above
-		filptr_cDIRFile += numBytesWritten;													//update the write pointer
-		snprintf(cWriteToLogFile, 10, "%d", filptr_cDIRFile);								//write formatted output to a sized buffer; create a string of a certain length
-		ffs_res = f_lseek(&directoryLogFile, (10 - LNumDigits(filptr_cDIRFile)));			// Move to the start of the file
-		ffs_res = f_write(&directoryLogFile, cWriteToLogFile, LNumDigits(filptr_cDIRFile), &numBytesWritten);	//Record the new file pointer
-		ffs_res = f_close(&directoryLogFile);												//close the file
-	}
-	else	//if the file exists, read it
-	{
-		ffs_res = f_open(&directoryLogFile, cDirectoryLogFile0, FA_READ);					//open the file
-		ffs_res = f_lseek(&directoryLogFile, 0);											//move to the beginning of the file
-		ffs_res = f_read(&directoryLogFile, &filptr_cDIRFile_buffer, 10, &numBytesWritten);	//read the write pointer
-		sscanf(filptr_cDIRFile_buffer, "%d", &filptr_cDIRFile);								//write the pointer to the relevant variable
-		ffs_res = f_close(&directoryLogFile);												//close the file
-	}
+//	if( f_stat( cLogFile, &fno) ){	// f_stat returns non-zero(false) if no file exists, so open/create the file
+//		ffs_res = f_open(&logFile, cLogFile, FA_WRITE|FA_OPEN_ALWAYS);
+//		ffs_res = f_write(&logFile, cZeroBuffer, 10, &numBytesWritten);
+//		filptr_clogFile += numBytesWritten;		// Protect the first xx number of bytes to use as flags, in this case xx must be 10
+//		ffs_res = f_close(&logFile);
+//	}
+//	else // If the file exists, read it
+//	{
+//		ffs_res = f_open(&logFile, cLogFile, FA_READ|FA_WRITE);	//open with read/write access
+//		ffs_res = f_lseek(&logFile, 0);							//go to beginning of file
+//		ffs_res = f_read(&logFile, &filptr_buffer, 10, &numBytesRead);	//Read the first 10 bytes to determine flags and the size of the write pointer
+//		sscanf(filptr_buffer, "%d", &filptr_clogFile);			//take the write pointer from char -> integer so we may use it
+//		ffs_res = f_lseek(&logFile, filptr_clogFile);			//move the write pointer so we don't overwrite info
+//		iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "POWER RESET %f ", dTime);	//write that the system was power cycled
+//		usleep(200);
+//		ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);	//write to the file
+//		filptr_clogFile += numBytesWritten;						//update the write pointer
+//		ffs_res = f_close(&logFile);							//close the file
+//	}
+//
+//	if( f_stat(cDirectoryLogFile0, &fnoDIR) )	//check if the file exists
+//	{
+//		ffs_res = f_open(&directoryLogFile, cDirectoryLogFile0, FA_WRITE|FA_OPEN_ALWAYS);	//if no, create the file
+//		ffs_res = f_write(&directoryLogFile, cZeroBuffer, 10, &numBytesWritten);			//write the zero buffer so we can keep track of the write pointer
+//		filptr_cDIRFile += 10;																//move the write pointer
+//		ffs_res = f_write(&directoryLogFile, cLogFile, 11, &numBytesWritten);				//write the name of the log file because it was created above
+//		filptr_cDIRFile += numBytesWritten;													//update the write pointer
+//		snprintf(cWriteToLogFile, 10, "%d", filptr_cDIRFile);								//write formatted output to a sized buffer; create a string of a certain length
+//		ffs_res = f_lseek(&directoryLogFile, (10 - LNumDigits(filptr_cDIRFile)));			// Move to the start of the file
+//		ffs_res = f_write(&directoryLogFile, cWriteToLogFile, LNumDigits(filptr_cDIRFile), &numBytesWritten);	//Record the new file pointer
+//		ffs_res = f_close(&directoryLogFile);												//close the file
+//	}
+//	else	//if the file exists, read it
+//	{
+//		ffs_res = f_open(&directoryLogFile, cDirectoryLogFile0, FA_READ);					//open the file
+//		ffs_res = f_lseek(&directoryLogFile, 0);											//move to the beginning of the file
+//		ffs_res = f_read(&directoryLogFile, &filptr_cDIRFile_buffer, 10, &numBytesWritten);	//read the write pointer
+//		sscanf(filptr_cDIRFile_buffer, "%d", &filptr_cDIRFile);								//write the pointer to the relevant variable
+//		ffs_res = f_close(&directoryLogFile);												//close the file
+//	}
 	// *********** Mount SD Card and Initialize Variables ****************//
 
 	// ******************* POLLING LOOP *******************//
@@ -124,25 +130,25 @@ int main()
 		xil_printf("\n\r***Setup Parameters *** \n\r");
 		xil_printf(" 3) Set Trigger Threshold\n\r");
 		xil_printf(" 4) Set Integration Times (Number of Clock Cycles * 4ns) \n\r");
-		xil_printf("\n\r*** Additional Commands *** \n\r");
-		xil_printf(" 5) Perform a DMA transfer of Waveform Data\n\r");
-		xil_printf(" 6) Perform a DMA transfer of Processed Data\n\r");
-		xil_printf(" 7) Check the Size of the Data Buffered (Max = 4095) \n\r");
-		xil_printf(" 8) Clear the Processed Data Buffers\n\r");
-		xil_printf(" 9) *** Execute Print of Data on DRAM *** deprecated ***\n\r");
-		xil_printf("10) GUI Serial Transfer \n\r");
-		xil_printf("11) GUI Serial Change Trigger Threshold\n\r");
-		xil_printf("12) GUI Serial Change Integration Times\n\r");
-		xil_printf("13) GUI Transfer Processed Data\n\r");
-		xil_printf("14) High Voltage and Temperature Control \n\r");
-		xil_printf("15) Print Out All Files in the Directory \n\r");
+//		xil_printf("\n\r*** Additional Commands *** \n\r");
+//		xil_printf(" 5) Perform a DMA transfer of Waveform Data\n\r");
+//		xil_printf(" 6) Perform a DMA transfer of Processed Data\n\r");
+//		xil_printf(" 7) Check the Size of the Data Buffered (Max = 4095) \n\r");
+//		xil_printf(" 8) Clear the Processed Data Buffers\n\r");
+//		xil_printf(" 9) *** Execute Print of Data on DRAM *** deprecated ***\n\r");
+//		xil_printf("10) GUI Serial Transfer \n\r");
+//		xil_printf("11) GUI Serial Change Trigger Threshold\n\r");
+//		xil_printf("12) GUI Serial Change Integration Times\n\r");
+//		xil_printf("13) GUI Transfer Processed Data\n\r");
+//		xil_printf("14) High Voltage and Temperature Control \n\r");
+//		xil_printf("15) Print Out All Files in the Directory \n\r");
 		xil_printf("******\n\r");
 
 		ReadCommandPoll();
 		menusel = 99999;
-		sscanf(RecvBuffer,"%02u",&menusel);
-		if ( menusel < 0 || menusel > 16 ) {
-			xil_printf(" Invalid Command: Enter 0-16 \n\r");
+		sscanf((char *)RecvBuffer,"%02u",&menusel);
+		if ( menusel < 0 || menusel > 4 ) {
+			xil_printf(" Invalid Command: Enter 0-4 \n\r");
 			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
 		}
 
@@ -156,7 +162,7 @@ int main()
 			xil_printf(" TRG Waveform Data: \t Enter 3 <return>\n\r");
 			xil_printf(" Processed Data: \t Enter 4 <return>\n\r");
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%01u",&mode);
+			sscanf((char *)RecvBuffer,"%01u",&mode);
 
 			if (mode < 0 || mode > 4 ) { xil_printf("Invalid Command\n\r"); break; }
 			Xil_Out32 (XPAR_AXI_GPIO_14_BASEADDR, ((u32)mode));
@@ -168,28 +174,28 @@ int main()
 			if ( mode == 4 ) { xil_printf("Transfer Processed Data\n\r"); }
 			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
 
-			dTime += 1;	//increment time for testing
-			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Set mode %d %f ", mode, dTime);
-
-			ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
-			if(ffs_res){
-				xil_printf("Could not open file %d", ffs_res);
-				break;
-			}
-			ffs_res = f_lseek(&logFile, filptr_clogFile);
-			ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
-			filptr_clogFile += numBytesWritten;
-			snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);
-			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));	// Move to the start of the file
-			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten);	//Record the new file pointer
-			ffs_res = f_close(&logFile);
+//			dTime += 1;	//increment time for testing
+//			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Set mode %d %f ", mode, dTime);
+//
+//			ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
+//			if(ffs_res){
+//				xil_printf("Could not open file %d", ffs_res);
+//				break;
+//			}
+//			ffs_res = f_lseek(&logFile, filptr_clogFile);
+//			ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
+//			filptr_clogFile += numBytesWritten;
+//			snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);
+//			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));	// Move to the start of the file
+//			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten);	//Record the new file pointer
+//			ffs_res = f_close(&logFile);
 			break;
 
 		case 1: //Enable or disable the system
 			xil_printf("\n\r Disable: Enter 0 <return>\n\r");
 			xil_printf(" Enable: Enter 1 <return>\n\r");
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%01u",&enable_state);
+			sscanf((char *)RecvBuffer,"%01u",&enable_state);
 			if (enable_state != 0 && enable_state != 1) { xil_printf("Invalid Command\n\r"); break; }
 			Xil_Out32(XPAR_AXI_GPIO_18_BASEADDR, ((u32)enable_state));
 			// Register 18 Out enabled, In Disabled
@@ -216,9 +222,76 @@ int main()
 			break;
 
 		case 2: //Continuously Read of Processed Data
+			ffs_res = f_open(&event_data_file, c_event_data, FA_OPEN_ALWAYS | FA_READ);	// open the data file
+			if(ffs_res)
+			{
+				xil_printf("Could not open file %d\r\n", ffs_res);
+				break;
+			}
+
+			ffs_res = f_lseek(&event_data_file, 0);	// open the data file
+			if(ffs_res)
+			{
+				xil_printf("Could not open file %d\r\n", ffs_res);
+				break;
+			}
+
+			while(1)
+			{
+				//read the data in from the file
+				ffs_res = f_read(&event_data_file, fake_event_data, sizeof(fake_event_data), &numBytesRead);
+				if(ffs_res)
+				{
+					xil_printf("Could not read the data %d\r\n", ffs_res);
+					break;
+				}
+
+				for(i = 0; i < numBytesRead; i++)
+				{
+					printf("%c",fake_event_data[i]);
+					if((i % 512) == 0)
+					{
+						//check for a 'q'
+						XUartPs_Recv(&Uart_PS, (u8 *)RecvBuffer, 32);	//receive input
+						if ( RecvBuffer[0] == 'q' ) { sw = 1; }		//if the first character in the buffer is 'q', set sw = 1
+						if(sw)										//if sw != 0, break out of the while loop, which will return to the main menu
+							break;
+					}
+				}
+
+				if(numBytesRead < 1000)
+				{
+					ffs_res = f_lseek(&event_data_file, 0);
+					if(ffs_res)
+					{
+						xil_printf("Could not seek to the beginning of the file\r\n");
+						break;
+					}
+				}
+
+				//check for a 'q'
+				XUartPs_Recv(&Uart_PS, (u8 *)RecvBuffer, 32);	//receive input
+				if ( RecvBuffer[0] == 'q' ) { sw = 1; }		//if the first character in the buffer is 'q', set sw = 1
+				if(sw)										//if sw != 0, break out of the while loop, which will return to the main menu
+					break;
+			}
+
+			sw = 0;   // broke out of the read loop, stop switch reset to 0
+			break;
+
+		case 3: //Set Threshold
+			iThreshold0 = Xil_In32(XPAR_AXI_GPIO_10_BASEADDR);
+			xil_printf("\n\r Existing Threshold = %d \n\r",Xil_In32(XPAR_AXI_GPIO_10_BASEADDR));
+			xil_printf(" Enter Threshold (0 to 10240) <return> \n\r");
+			ReadCommandPoll();
+			sscanf((char *)RecvBuffer,"%05u",&iThreshold1);
+			if((iThreshold1 < 0) || (iThreshold1 > 10240)) { xil_printf("Invalid command\r\n"); break; }
+			Xil_Out32(XPAR_AXI_GPIO_10_BASEADDR, ((u32)iThreshold1));
+			xil_printf("New Threshold = %d \n\r",Xil_In32(XPAR_AXI_GPIO_10_BASEADDR));
+			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
 
 //			dTime += 1;
-//			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Print data %d %f ", enable_state, dTime);
+//			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Set trigger threshold from %d to %d %f ", iThreshold0, iThreshold1, dTime);
 //
 //			ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
 //			if(ffs_res){
@@ -232,62 +305,7 @@ int main()
 //			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
 //			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
 //			ffs_res = f_close(&logFile);
-
-//			xil_printf("\n\r ********Data Acquisition:\n\r");
-//			xil_printf(" Press 'q' to Stop or Press Hardware USR reset button  \n\r");
-//			xil_printf(" Press <return> to Start\n\r");
-//			ReadCommandPoll();	//Just get a '\n' to continue
-//			getWFDAQ();
-
-			while(1)
-			{
-				//we are going to print out a fake "event" each run through
-				for(i = 0; i < 25; i++)
-				{
-					if(i == 0)
-						xil_printf("111111\n\r");
-					else
-						xil_printf("%d\n\r",i);
-				}
-
-				i=0;	//reset the iterator
-
-				//check for a 'q'
-				XUartPs_Recv(&Uart_PS, &RecvBuffer, 32);	//receive input
-				if ( RecvBuffer[0] == 'q' ) { sw = 1; }		//if the first character in the buffer is 'q', set sw = 1
-				if(sw)										//if sw != 0, break out of the while loop, which will return to the main menu
-					break;
-			}
-
-			sw = 0;   // broke out of the read loop, stop switch reset to 0
-			break;
-
-		case 3: //Set Threshold
-			iThreshold0 = Xil_In32(XPAR_AXI_GPIO_10_BASEADDR);
-			xil_printf("\n\r Existing Threshold = %d \n\r",Xil_In32(XPAR_AXI_GPIO_10_BASEADDR));
-			xil_printf(" Enter Threshold (6144 to 10240) <return> \n\r");
-			ReadCommandPoll();
-			sscanf(RecvBuffer,"%04u",&iThreshold1);
-			Xil_Out32(XPAR_AXI_GPIO_10_BASEADDR, ((u32)iThreshold1));
-			xil_printf("New Threshold = %d \n\r",Xil_In32(XPAR_AXI_GPIO_10_BASEADDR));
-			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
-
-			dTime += 1;
-			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Set trigger threshold from %d to %d %f ", iThreshold0, iThreshold1, dTime);
-
-			ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
-			if(ffs_res){
-				xil_printf("Could not open file %d", ffs_res);
-				break;
-			}
-			ffs_res = f_lseek(&logFile, filptr_clogFile);
-			ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
-			filptr_clogFile += numBytesWritten;
-			snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
-			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
-			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
-			ffs_res = f_close(&logFile);
-			break;
+//			break;
 
 		case 4: //Set Integration Times
 			setIntsArray[4] = -52 + ((int)Xil_In32(XPAR_AXI_GPIO_0_BASEADDR))*4;
@@ -303,44 +321,43 @@ int main()
 			xil_printf(" Full Integral Window  \t [-200ns,%dns] \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_3_BASEADDR))*4 );
 			xil_printf(" Change: (Y)es (N)o <return>\n\r");
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%c",&updateint);
+			sscanf((char *)RecvBuffer,"%c",&updateint);
 
 			if (updateint == 'N' || updateint == 'n') {
-				dTime += 1;
-				iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "No change to integration times of %d %d %d %d %f ", setIntsArray[4], setIntsArray[5], setIntsArray[6], setIntsArray[7], dTime);
-				ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
-				if(ffs_res){
-					xil_printf("Could not open file %d", ffs_res);
-					break;
-				}
-				ffs_res = f_lseek(&logFile, filptr_clogFile);
-				ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
-				filptr_clogFile += numBytesWritten;
-				snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
-				ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
-				ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
-				ffs_res = f_close(&logFile);
+//				dTime += 1;
+//				iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "No change to integration times of %d %d %d %d %f ", setIntsArray[4], setIntsArray[5], setIntsArray[6], setIntsArray[7], dTime);
+//				ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
+//				if(ffs_res){
+//					xil_printf("Could not open file %d", ffs_res);
+//					break;
+//				}
+//				ffs_res = f_lseek(&logFile, filptr_clogFile);
+//				ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
+//				filptr_clogFile += numBytesWritten;
+//				snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
+//				ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
+//				ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
+//				ffs_res = f_close(&logFile);
 				break;
 			}
 
 			if (updateint == 'Y' || updateint == 'y') {
 				SetIntegrationTimes(&setIntsArray, &setSamples);
-				dTime += 1;
-				iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Set integration times to %d %d %d %d from %d %d %d %d %f ",
-						setIntsArray[0], setIntsArray[1], setIntsArray[2], setIntsArray[3], setIntsArray[4], setIntsArray[5], setIntsArray[6], setIntsArray[7], dTime);
-				ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
-				if(ffs_res){
-					xil_printf("Could not open file %d", ffs_res);
-					break;
-				}
-				ffs_res = f_lseek(&logFile, filptr_clogFile);
-				ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
-				filptr_clogFile += numBytesWritten;
-				snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
-				ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
-				ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
-				ffs_res = f_close(&logFile);
-
+//				dTime += 1;
+//				iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Set integration times to %d %d %d %d from %d %d %d %d %f ",
+//						setIntsArray[0], setIntsArray[1], setIntsArray[2], setIntsArray[3], setIntsArray[4], setIntsArray[5], setIntsArray[6], setIntsArray[7], dTime);
+//				ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
+//				if(ffs_res){
+//					xil_printf("Could not open file %d", ffs_res);
+//					break;
+//				}
+//				ffs_res = f_lseek(&logFile, filptr_clogFile);
+//				ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
+//				filptr_clogFile += numBytesWritten;
+//				snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
+//				ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
+//				ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
+//				ffs_res = f_close(&logFile);
 			}
 
 			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
@@ -402,7 +419,7 @@ int main()
 		case 11: //change threshold over the serial connection
 			xil_printf("Enter the new threshold: <enter>\n");
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%04u",&iThreshold1);
+			sscanf((char *)RecvBuffer,"%04u",&iThreshold1);
 			Xil_Out32(XPAR_AXI_GPIO_10_BASEADDR, ((u32)iThreshold1));
 			xil_printf("New Threshold = %d \n\r",Xil_In32(XPAR_AXI_GPIO_10_BASEADDR));
 			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
@@ -410,13 +427,13 @@ int main()
 		case 12: //change integrals over the serial connection
 			xil_printf("Enter each integral time followed by <enter>");
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%04u",&setBL);
+			sscanf((char *)RecvBuffer,"%04u",&setBL);
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%04u",&setSI);
+			sscanf((char *)RecvBuffer,"%04u",&setSI);
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%04u",&setLI);
+			sscanf((char *)RecvBuffer,"%04u",&setLI);
 			ReadCommandPoll();
-			sscanf(RecvBuffer,"%04u",&setFI);
+			sscanf((char *)RecvBuffer,"%04u",&setFI);
 
 			Xil_Out32 (XPAR_AXI_GPIO_0_BASEADDR, ((u32)((setBL+52)/4)));	//set baseline int time
 			Xil_Out32 (XPAR_AXI_GPIO_1_BASEADDR, ((u32)((setSI+52)/4)));	//set short int time
@@ -450,7 +467,7 @@ int main()
 
 			ReadCommandPoll();
 			menusel = 99999;
-			sscanf(RecvBuffer,"%01u",&menusel);
+			sscanf((char *)RecvBuffer,"%01u",&menusel);
 			if( menusel < 0 || menusel > 4) { xil_printf("Invalid command.\n\r"); sleep(1); continue; }
 
 			switch(menusel){
@@ -727,7 +744,7 @@ int ReadCommandPoll() {
 
 	XUartPs_SetOptions(&Uart_PS,XUARTPS_OPTION_RESET_RX);	// Clear UART Read Buffer
 	memset(RecvBuffer, '0', 32);	// Clear RecvBuffer Variable
-	while (!(RecvBuffer[rbuff-1] == '\n' || RecvBuffer[rbuff-1] == '\r' || RecvBuffer[rbuff-1] == 'd'))
+	while (!(RecvBuffer[rbuff-1] == '\n' || RecvBuffer[rbuff-1] == '\r'))
 	{
 		rbuff += XUartPs_Recv(&Uart_PS, &RecvBuffer[rbuff],(32 - rbuff));
 		sleep(0.1);			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 0.1 s
@@ -746,25 +763,21 @@ void SetIntegrationTimes(int * setIntsArray, u32 * setSamples){
 	//int setIntsArray[8] = {};
 	//u32 setsamples[8] = {};
 
-	xil_printf("  Enter Baseline Stop Time in ns: -52 to 0 <return> \t");
+	xil_printf("Enter Baseline Stop Time in ns: -52 to 0 <return> \r\n");
 	ReadCommandPoll();
-	sscanf(RecvBuffer,"%d",&setIntsArray[0]);
-	xil_printf("\n\r");
+	sscanf((char *)RecvBuffer,"%d",&setIntsArray[0]);
 
-	xil_printf("  Enter Short Integral Stop Time in ns: -52 to 8000 <return> \t");
+	xil_printf("\n\rEnter Short Integral Stop Time in ns: -52 to 8000 <return> \n\r");
 	ReadCommandPoll();
-	sscanf(RecvBuffer,"%d",&setIntsArray[1]);
-	xil_printf("\n\r");
+	sscanf((char *)RecvBuffer,"%d",&setIntsArray[1]);
 
-	xil_printf("  Enter Long Integral Stop Time in ns: -52 to 8000 <return> \t");
+	xil_printf("\n\rEnter Long Integral Stop Time in ns: -52 to 8000 <return> \n\r");
 	ReadCommandPoll();
-	sscanf(RecvBuffer,"%d",&setIntsArray[2]);
-	xil_printf("\n\r");
+	sscanf((char *)RecvBuffer,"%d",&setIntsArray[2]);
 
-	xil_printf("  Enter Full Integral Stop Time in ns: -52 to 8000 <return> \t");
+	xil_printf("\n\rEnter Full Integral Stop Time in ns: -52 to 8000 <return> \n\r");
 	ReadCommandPoll();
-	sscanf(RecvBuffer,"%d",&setIntsArray[3]);
-	xil_printf("\n\r");
+	sscanf((char *)RecvBuffer,"%d",&setIntsArray[3]);
 
 	setSamples[0] = ((u32)((setIntsArray[0]+52)/4));
 	setSamples[1] = ((u32)((setIntsArray[1]+52)/4));
@@ -776,11 +789,13 @@ void SetIntegrationTimes(int * setIntsArray, u32 * setSamples){
 	Xil_Out32 (XPAR_AXI_GPIO_2_BASEADDR, setSamples[2]);
 	Xil_Out32 (XPAR_AXI_GPIO_3_BASEADDR, setSamples[3]);
 
-	xil_printf("\n\r  Inputs Rounded to the Nearest 4 ns : Number of Samples\n\r");
-	xil_printf("  Baseline Integral Window  [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_0_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_0_BASEADDR) );
-	xil_printf("  Short Integral Window 	  [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_1_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_1_BASEADDR));
-	xil_printf("  Long Integral Window      [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_2_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_2_BASEADDR));
-	xil_printf("  Full Integral Window      [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_3_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_3_BASEADDR));
+	xil_printf("\n\rInputs Rounded to the Nearest 4 ns : Number of Samples\n\r");
+	xil_printf("Baseline Integral Window  [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_0_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_0_BASEADDR) );
+	xil_printf("Short Integral Window 	  [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_1_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_1_BASEADDR));
+	xil_printf("Long Integral Window      [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_2_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_2_BASEADDR));
+	xil_printf("Full Integral Window      [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_3_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_3_BASEADDR));
+
+	xil_printf("value of gpio 3: %d\r\n", Xil_In32(XPAR_AXI_GPIO_3_BASEADDR));
 
 	return;
 }
@@ -799,7 +814,7 @@ int PrintData( ){
 		if (!sw) { sw = XGpioPs_ReadPin(&Gpio, SW_BREAK_GPIO); } //read pin
 		data = Xil_In32(dram_addr);
 		xil_printf("%d\r\n",data);				//is there a better place to put this? We need to transfer it over USB, but can we do that rather than printing it?
-		XUartPs_Recv(&Uart_PS, &RecvBuffer, 32);
+		XUartPs_Recv(&Uart_PS, (u8 *)RecvBuffer, 32);
 		if ( RecvBuffer[0] == 'q' ) { sw = 1;  }
 		if(sw) { return sw; }
 	}
@@ -811,7 +826,6 @@ int PrintData( ){
 //////////////////////////// Clear Processed Data Buffers ////////////////////////////////
 void ClearBuffers() {
 	Xil_Out32(XPAR_AXI_GPIO_9_BASEADDR,1);
-	//sleep(1);								// we should not need this
 	Xil_Out32(XPAR_AXI_GPIO_9_BASEADDR,0);
 }
 //////////////////////////// Clear Processed Data Buffers ////////////////////////////////
@@ -834,7 +848,7 @@ int DAQ(){
 	while(1){
 		buffsize = Xil_In32 (XPAR_AXI_GPIO_11_BASEADDR);
 		if (!sw) { sw = XGpioPs_ReadPin(&Gpio, SW_BREAK_GPIO); } //read pin
-		XUartPs_Recv(&Uart_PS, &RecvBuffer, 32);
+		XUartPs_Recv(&Uart_PS, (u8 *)RecvBuffer, 32);
 		if ( RecvBuffer[0] == 'q' ) { sw = 1; }
 		if(sw) { return sw;	}
 
@@ -872,7 +886,7 @@ int getWFDAQ(){
 
 	while(1){
 		if (!sw) { sw = XGpioPs_ReadPin(&Gpio, SW_BREAK_GPIO); } //read pin
-		XUartPs_Recv(&Uart_PS, &RecvBuffer, 32);
+		XUartPs_Recv(&Uart_PS, (u8 *)RecvBuffer, 32);
 		if ( RecvBuffer[0] == 'q' ) { sw = 1; }
 		if(sw) { return sw;	}
 

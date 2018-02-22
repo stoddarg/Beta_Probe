@@ -68,6 +68,11 @@ FIL directoryLogFile;
 char filptr_cDIRFile_buffer[11] = {};
 int filptr_cDIRFile = 0;
 
+//print data variables
+FIL event_data_file;
+char c_event_data[] = "EvtList.txt";
+int fake_event_file_size = 0;
+
 char cWriteToLogFile[LOG_FILE_BUFF_SIZE] = "";			//The buffer for adding information to the log file
 int iSprintfReturn = 0;
 double dTime = 12345.67;
