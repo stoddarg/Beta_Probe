@@ -203,22 +203,21 @@ int main()
 			if ( enable_state == 0 ) { xil_printf("DAQ Disabled\n\r"); }
 			sleep(1); 			// Built in Latency ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1 s
 
-			dTime += 1;
-			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Enable system %d %f ", enable_state, dTime);
-
-			ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
-			if(ffs_res){
-				xil_printf("Could not open file %d", ffs_res);
-				break;
-			}
-			ffs_res = f_lseek(&logFile, filptr_clogFile);
-			ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
-			filptr_clogFile += numBytesWritten;												// Add the number of bytes written to the file pointer
-			snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
-			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
-			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
-			ffs_res = f_close(&logFile);
-
+//			dTime += 1;
+//			iSprintfReturn = snprintf(cWriteToLogFile, LOG_FILE_BUFF_SIZE, "Enable system %d %f ", enable_state, dTime);
+//
+//			ffs_res = f_open(&logFile, cLogFile, FA_OPEN_ALWAYS | FA_WRITE);
+//			if(ffs_res){
+//				xil_printf("Could not open file %d", ffs_res);
+//				break;
+//			}
+//			ffs_res = f_lseek(&logFile, filptr_clogFile);
+//			ffs_res = f_write(&logFile, cWriteToLogFile, iSprintfReturn, &numBytesWritten);
+//			filptr_clogFile += numBytesWritten;												// Add the number of bytes written to the file pointer
+//			snprintf(cWriteToLogFile, 10, "%d", filptr_clogFile);							// Write that to a string for saving
+//			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
+//			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
+//			ffs_res = f_close(&logFile);
 			break;
 
 		case 2: //Continuously Read of Processed Data
@@ -305,7 +304,7 @@ int main()
 //			ffs_res = f_lseek(&logFile, (10 - LNumDigits(filptr_clogFile)));				// Seek to the beginning of the file skipping the leading zeroes
 //			ffs_res = f_write(&logFile, cWriteToLogFile, LNumDigits(filptr_clogFile), &numBytesWritten); // Write the new file pointer
 //			ffs_res = f_close(&logFile);
-//			break;
+			break;
 
 		case 4: //Set Integration Times
 			setIntsArray[4] = -52 + ((int)Xil_In32(XPAR_AXI_GPIO_0_BASEADDR))*4;
@@ -794,8 +793,6 @@ void SetIntegrationTimes(int * setIntsArray, u32 * setSamples){
 	xil_printf("Short Integral Window 	  [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_1_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_1_BASEADDR));
 	xil_printf("Long Integral Window      [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_2_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_2_BASEADDR));
 	xil_printf("Full Integral Window      [-200ns,%dns]: %d \n\r",-52 + ((int)Xil_In32(XPAR_AXI_GPIO_3_BASEADDR))*4, 38+Xil_In32(XPAR_AXI_GPIO_3_BASEADDR));
-
-	xil_printf("value of gpio 3: %d\r\n", Xil_In32(XPAR_AXI_GPIO_3_BASEADDR));
 
 	return;
 }
